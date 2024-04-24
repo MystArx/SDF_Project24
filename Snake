@@ -1,1 +1,142 @@
+#include <SFML/Graphics.hpp>
+#include <iostream>
+#include <vector>
+#include <ctime>
 
+const int WIDTH = 800;
+const int HEIGHT = 600;
+const int BLOCK_SIZE = 20;
+
+enum Direction { UP, DOWN, LEFT, RIGHT };
+
+class Snake {
+private:
+    std::vector<sf::RectangleShape> body;
+    Direction dir;
+public:
+    Snake() {
+        dir = RIGHT;
+        sf::RectangleShape segment(sf::Vector2f(BLOCK_SIZE, BLOCK_SIZE));
+        segment.setFillColor(sf::Color::Green);
+        segment.setPosition(100, 100);
+        body.push_back(segment);
+    }
+
+    void move() {
+        sf::Vector2f nextPos = body[0].getPosition();
+        switch (dir) {
+        case UP:
+            nextPos.y -= BLOCK_SIZE;
+            break;
+        case DOWN:
+            nextPos.y += BLOCK_SIZE;
+            break;
+        case LEFT:
+            nextPos.x -= BLOCK_SIZE;
+            break;
+        case RIGHT:
+            nextPos.x += BLOCK_SIZE;
+            break;
+        }
+        for (int i = body.size() - 1; i > 0; --i) {
+            body[i].setPosition(body[i - 1].getPosition());
+        }
+        body[0].setPosition(nextPos);
+    }
+
+    void grow() {
+        sf::RectangleShape segment(sf::Vector2f(BLOCK_SIZE, BLOCK_SIZE));
+        segment.setFillColor(sf::Color::Green);
+        segment.setPosition(body.back().getPosition());
+        body.push_back(segment);
+    }
+
+    void setDirection(Direction direction) {
+        if ((direction == UP && dir != DOWN) ||
+            (direction == DOWN && dir != UP) ||
+            (direction == LEFT && dir != RIGHT) ||
+            (direction == RIGHT && dir != LEFT)) {
+            dir = direction;
+        }
+    }
+
+    void draw(sf::RenderWindow& window) {
+        for (const auto& segment : body) {
+            window.draw(segment);
+        }
+    }
+};
+
+class Game {
+private:
+    sf::RenderWindow window;
+    Snake snake;
+    sf::Clock clock;
+    float timer;
+public:
+    Game() : window(sf::VideoMode(WIDTH, HEIGHT), "Snake Game") {
+        timer = 0;
+        window.setFramerateLimit(10);
+    }
+
+    void run() {
+        while (window.isOpen()) {
+            processEvents();
+            update();
+            render();
+        }
+    }
+
+    void processEvents() {
+        sf::Event event;
+        while (window.pollEvent(event)) {
+            switch (event.type) {
+            case sf::Event::Closed:
+                window.close();
+                break;
+            case sf::Event::KeyPressed:
+                handleKeyPress(event.key.code);
+                break;
+            }
+        }
+    }
+
+    void handleKeyPress(sf::Keyboard::Key key) {
+        switch (key) {
+        case sf::Keyboard::Up:
+            snake.setDirection(UP);
+            break;
+        case sf::Keyboard::Down:
+            snake.setDirection(DOWN);
+            break;
+        case sf::Keyboard::Left:
+            snake.setDirection(LEFT);
+            break;
+        case sf::Keyboard::Right:
+            snake.setDirection(RIGHT);
+            break;
+        }
+    }
+
+    void update() {
+        float deltaTime = clock.restart().asSeconds();
+        timer += deltaTime;
+        if (timer >= 0.1f) {
+            snake.move();
+            timer = 0;
+        }
+    }
+
+    void render() {
+        window.clear();
+        snake.draw(window);
+        window.display();
+    }
+};
+
+int main() {
+    srand(static_cast<unsigned>(time(NULL)));
+    Game game;
+    game.run();
+    return 0;
+}
