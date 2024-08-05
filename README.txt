@@ -24,5 +24,5 @@ Player Experience Enhancement: Our objective is to create games that are not onl
 Tools and Technologies:
 
 C++ Programming Language: Leveraging the power of C++, we have write efficient code to implement game logic, mechanics, and user interactions.
-SFML Library: SFMLserves as our toolkit for handling graphics, input events, allowing us to bring our games to life with ease.
+Windows.h header files
 Development Environment: W work within our preferred C++ development environment, whether it's Visual Studio, Code::Blocks.
